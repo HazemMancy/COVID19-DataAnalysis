@@ -1,5 +1,5 @@
 # COVID-19 Data Analysis Project
-Trying to get thoughts about COVID-19 global dataset till 09/03/2022
+Trying to get thoughts about COVID-19 global data till 09/03/2022
 ## Objective
 Data exploration and data cleaning in SQL and data visualization using Tableau
 ## Data Source
