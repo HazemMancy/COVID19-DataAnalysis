@@ -53,6 +53,25 @@ and location not in ('World', 'European Union', 'International')
 Group BY location);
 
 
+-- Global cases and death count
+SELECT SUM(CAST(new_cases as int)) as GlobalCasesCount, SUM(CAST(new_deaths as int)) as GlobalDeathCount
+FROM covid_db..CovidDeaths
+--WHERE location like '%Egypt%'
+WHERE continent is null 
+and location not in ('World', 'European Union', 'International');
+
+
+--DROP VIEW IF EXISTS GlobalCasesDeathsCount
+CREATE VIEW GlobalCasesDeathsCount AS (
+SELECT SUM(CAST(new_cases as int)) as GlobalCasesCount, SUM(CAST(new_deaths as int)) as GlobalDeathCount
+FROM covid_db..CovidDeaths
+--WHERE location like '%Egypt%'
+WHERE continent is null 
+and location not in ('World', 'European Union', 'International'));
+
+
+
+
 -- 3. Infection count per population till 09/03/2022
 
 SELECT Location, Population, MAX(total_cases) as HighestInfectionCount,  Max((total_cases/population))*100 as PercentPopulationInfected
@@ -69,7 +88,7 @@ Group BY Location, Population);
 
 -- 4. Daily infection count and percentage per population for all countries
 
-SELECT Location, Population,date, MAX(total_cases) as HighestInfectionCount,  Max((total_cases/population))*100 as PercentPopulationInfected
+SELECT Location, Population,date, SUM(new_cases) as DailyCasesCount,  Max((total_cases/population))*100 as PercentPopulationInfected
 FROM covid_db..CovidDeaths
 --WHERE location like '%Egypt%'
 Group BY Location, Population, date
@@ -77,8 +96,8 @@ ORDER BY PercentPopulationInfected DESC;
 
 
 --DROP VIEW IF EXISTS DailyPercentPopulationInfected
-CREATE VIEW DailyPercentPopulationInfected AS (
-SELECT Location, Population,date, MAX(total_cases) as HighestInfectionCount,  Max((total_cases/population))*100 as PercentPopulationInfected
+CREATE VIEW DailyCasesCount AS (
+SELECT Location, Population,date, SUM(new_cases) as DailyCasesCount,  Max((total_cases/population))*100 as PercentPopulationInfected
 FROM covid_db..CovidDeaths
 Group BY Location, Population, date);
 
@@ -99,16 +118,16 @@ Group BY Location, Population);
 
 -- 6. Daily death count and percentage per population for all countries
 
-SELECT Location, Population,date, MAX(total_deaths) as HighestDeathCount,  Max((total_deaths/population))*100 as PercentPopulationDeath
+SELECT Location, Population,date, SUM(new_deaths) as DailyDeathCount,  Max((total_deaths/population))*100 as PercentPopulationDeath
 FROM covid_db..CovidDeaths
 --WHERE location like '%Egypt%'
 Group BY Location, Population, date
 ORDER BY PercentPopulationDeath DESC;
 
 
---DROP VIEW IF EXISTS DailyPercentPopulationDeath
-CREATE VIEW DailyPercentPopulationDeath AS (
-SELECT Location, Population,date, MAX(total_deaths) as HighestDeathCount,  Max((total_deaths/population))*100 as PercentPopulationDeath
+--DROP VIEW IF EXISTS DailyDeathCount
+CREATE VIEW DailyDeathCount AS (
+SELECT Location, Population,date, SUM(new_deaths) as DailyDeathCount,  Max((total_deaths/population))*100 as PercentPopulationDeath
 FROM covid_db..CovidDeaths
 Group BY Location, Population, date);
 
@@ -116,8 +135,8 @@ Group BY Location, Population, date);
 -- 7. Rolling People Vaccinated by date for all countries
 
 SELECT dea.continent, dea.location, dea.date, dea.population
-, MAX(CAST(vac.total_vaccinations AS float)) as RollingPeopleVaccinated
---, (RollingPeopleVaccinated/population)*100
+, SUM(CAST(vac.new_vaccinations AS float)) as DailyVaccinatioins
+--, (DailyVaccinatioins/population)*100
 FROM covid_db..CovidDeaths dea
 Join covid_db..CovidVaccinations vac
 	On dea.location = vac.location
@@ -126,11 +145,11 @@ WHERE dea.continent is not null
 group BY dea.continent, dea.location, dea.date, dea.population
 ORDER BY 1,2,3;
 
-DROP VIEW IF EXISTS RollingPeopleVaccinated
-CREATE VIEW RollingPeopleVaccinated AS (
-SELECT dea.continent, dea.location, dea.date, dea.population
-, MAX(CAST(vac.total_vaccinations AS float)) as RollingPeopleVaccinated
---, (RollingPeopleVaccinated/population)*100
+--DROP VIEW IF EXISTS DailyVaccinations
+CREATE VIEW DailyVaccinations AS (
+SELECT dea.continent, dea.location, dea.date, dea.population,
+	SUM(CAST(vac.new_vaccinations AS float)) as DailyVaccinatioins
+--, (DailyVaccinatioins/population)*100
 FROM covid_db..CovidDeaths dea
 Join covid_db..CovidVaccinations vac
 	On dea.location = vac.location
