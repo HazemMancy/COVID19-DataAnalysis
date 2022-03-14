@@ -35,7 +35,7 @@ ORDER BY 1,2;
 -- We take these out as they are not inluded in the above queries and want to stay consistent
 -- European Union is part of Europe
 
-SELECT location, SUM(CAST(new_deaths as int)) as TotalDeathCount
+SELECT location, SUM(CAST(new_cases as int)) as TotalCasesCount, SUM(CAST(new_deaths as int)) as TotalDeathCount
 FROM covid_db..CovidDeaths
 --WHERE location like '%Egypt%'
 WHERE continent is null 
@@ -44,9 +44,9 @@ Group BY location
 ORDER BY TotalDeathCount DESC;
 
 
---DROP VIEW IF EXISTS Total_Cases_and_Deaths
-CREATE VIEW Total_Cases_and_Deaths AS (
-SELECT location, SUM(CAST(new_deaths as int)) as TotalDeathCount
+--DROP VIEW IF EXISTS TotalCasesDeathsCount
+CREATE VIEW TotalCasesDeathsCount AS (
+SELECT location, SUM(CAST(new_cases as int)) as TotalCasesCount, SUM(CAST(new_deaths as int)) as TotalDeathCount
 FROM covid_db..CovidDeaths
 WHERE continent is null 
 and location not in ('World', 'European Union', 'International')
